@@ -18,7 +18,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "docker-compose exec -T web lint-staged"
+      "pre-commit": "echo 'hi' && docker-compose exec -T web lint-staged"
     }
   },
   "lint-staged": {
