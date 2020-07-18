@@ -1,7 +1,7 @@
 version: '3.7'
 services:
     web:
-        image: node:12-buster
+        build: .
         restart: unless-stopped
         ports:
           - "443:443"
@@ -12,7 +12,6 @@ services:
         volumes:
             - .:/src
             - node_modules:/src/node_modules
-        command: sh -c "cd /src && npm install && npm start"
         environment:
             NODE_ENV: development
             PORT: 3000
