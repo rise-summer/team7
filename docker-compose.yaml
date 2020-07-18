@@ -1,8 +1,8 @@
 version: '3.7'
 services:
     web:
-        build: ./app
-        restart: always
+        build: .
+        restart: unless-stopped
         ports:
           - "443:443"
           - "8080:8080"
@@ -10,15 +10,20 @@ services:
         depends_on:
           - db
         volumes:
-            - ./app:/src
+            - .:/src
+            - node_modules:/src/node_modules
         environment:
             NODE_ENV: development
             PORT: 3000
     db:
          image: mongo
-         restart: always
+         restart: unless-stopped
          environment:
             MONGO_INITDB_ROOT_USERNAME: root
             MONGO_INITDB_ROOT_PASSWORD: changethistoamoresecurepassword
          volumes:
            - ./data:/data/db
+         logging:
+             driver: "none"
+volumes:
+    node_modules:

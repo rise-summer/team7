@@ -1,5 +1,0 @@
-{
-    "hooks": {
-      "pre-commit": "cd app && docker-compose exec -T web lint-staged"
-    }
-}
