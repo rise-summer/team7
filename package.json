@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node .",
+    "lint": "lint-staged",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -18,7 +19,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "docker-compose run -T web lint-staged"
+      "pre-commit": "docker-compose run -T --no-deps -v .:/src -w /src web npm run lint"
     }
   },
   "lint-staged": {
