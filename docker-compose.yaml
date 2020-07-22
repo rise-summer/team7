@@ -11,21 +11,23 @@ services:
           - db
         volumes:
             - .:/src
-            - node_modules:/src/node_modules
+            # - node_modules:/src/node_modules
         command: sh -c "cd /src && npm start"
         environment:
             NODE_ENV: development
             PORT: 3000
             SESSION_SECRET: changethistosomethingsupersecret
+            DB_USERNAME: admin
+            DB_PASSWORD: changethistoamoresecurepassword
     db:
          image: mongo
          restart: unless-stopped
          environment:
-            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_USERNAME: admin
             MONGO_INITDB_ROOT_PASSWORD: changethistoamoresecurepassword
          volumes:
            - ./data:/data/db
          logging:
              driver: "none"
-volumes:
-    node_modules:
+# volumes:
+#     node_modules:
