@@ -64,6 +64,24 @@ app.get("/", (req, res) => {
   res.end("hello world");
 });
 
+//show fundraiser setup page
+//  require logged in
+app.get("/interactions", (req, res) => {
+  let user_url = req.body.user_url;
+  User.findOne({ url: user_url }, "interactions")
+    .exec()
+    .then((u) => {
+      if (u) {
+        res.status(200).json(u.interactions);
+      } else {
+        res.status(404).end("User not found");
+      }
+    })
+    .catch(() => {
+      res.status(404).end("User not found");
+    });
+});
+
 app.post("/login", passport.authenticate("local"), (req, res) => {
   //
   res.end("good");
@@ -75,6 +93,7 @@ app.post("/signup", (req, res) => {
       firstname: req.body.firstname,
       lastname: req.body.lastname,
       email: req.body.email,
+      url: "TESTING",
     }),
     req.body.password,
     function (err, account) {

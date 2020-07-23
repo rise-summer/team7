@@ -11,6 +11,19 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  interactions: [
+    {
+      id: mongoose.ObjectId,
+      name: String,
+      description: String,
+      price: Number,
+      limit: Number,
+    },
+  ],
+  url: {
+    type: String,
+    unique: true,
+  },
   email: {
     type: mongoose.SchemaTypes.Email,
   },
