@@ -7,8 +7,10 @@ const session = require("express-session");
 const MongoStore = require("connect-mongo")(session);
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-const generate = require("nanoid/generate");
+const en = require("nanoid-good/locale/en");
+const generate = require("nanoid-good/generate")(en);
 const id_alphabet = "2346789ABCDEFGHJKLMNPQRTUVWXYZabcdefghijkmnpqrtwxyz";
+// const nanoid = customAlphabet(id_alphabet);
 const nanoid = () => generate(id_alphabet, 10);
 // const csurf = require('csurf');
 
@@ -62,6 +64,14 @@ passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+function loggedIn(req, res, next) {
+  if (req.isAuthenticated()) {
+    next();
+  } else {
+    res.status(401).end("Login required");
+  }
+}
+
 /********** ROUTES ************/
 app.get("/", (req, res) => {
   res.end("hello world");
@@ -86,9 +96,22 @@ app.get("/interactions", (req, res) => {
     });
 });
 
-// app.post("/interactions", passport.authenticate('local'), (req, res) => {
-//   let user = req.user;
-// });
+app.get("/profile", loggedIn, (req, res) => {
+  let user = req.user;
+  User.findById(user.id)
+    .select("firstname lastname email url interactions")
+    .exec()
+    .then((u) => {
+      if (u) {
+        res.status(200).json(u);
+      } else {
+        res.status(404).end("User not found");
+      }
+    })
+    .catch(() => {
+      res.status(404).end("User not found");
+    });
+});
 
 app.post("/login", passport.authenticate("local"), (req, res) => {
   //
