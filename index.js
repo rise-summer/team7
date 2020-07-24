@@ -7,6 +7,9 @@ const session = require("express-session");
 const MongoStore = require("connect-mongo")(session);
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+const generate = require("nanoid/generate");
+const id_alphabet = "2346789ABCDEFGHJKLMNPQRTUVWXYZabcdefghijkmnpqrtwxyz";
+const nanoid = () => generate(id_alphabet, 10);
 // const csurf = require('csurf');
 
 mongoose.connect(`mongodb://db:27017/${process.env.DB_NAME}`, {
@@ -66,6 +69,7 @@ app.get("/", (req, res) => {
 
 //show fundraiser setup page
 //  require logged in
+
 app.get("/interactions", (req, res) => {
   let user_url = req.body.user_url;
   User.findOne({ url: user_url }, "interactions")
@@ -82,9 +86,13 @@ app.get("/interactions", (req, res) => {
     });
 });
 
+// app.post("/interactions", passport.authenticate('local'), (req, res) => {
+//   let user = req.user;
+// });
+
 app.post("/login", passport.authenticate("local"), (req, res) => {
   //
-  res.end("good");
+  res.end("logged in");
 });
 
 app.post("/signup", (req, res) => {
@@ -93,7 +101,7 @@ app.post("/signup", (req, res) => {
       firstname: req.body.firstname,
       lastname: req.body.lastname,
       email: req.body.email,
-      url: "TESTING",
+      url: nanoid(),
     }),
     req.body.password,
     function (err, account) {
@@ -105,7 +113,7 @@ app.post("/signup", (req, res) => {
       console.log(account);
       passport.authenticate("local")(req, res, function () {
         //on success
-        res.end("nice");
+        res.end("signup successful");
       });
     }
   );
