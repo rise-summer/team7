@@ -7,11 +7,6 @@ const session = require("express-session");
 const MongoStore = require("connect-mongo")(session);
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-const en = require("nanoid-good/locale/en");
-const generate = require("nanoid-good/generate")(en);
-const id_alphabet = "2346789ABCDEFGHJKLMNPQRTUVWXYZabcdefghijkmnpqrtwxyz";
-// const nanoid = customAlphabet(id_alphabet);
-const nanoid = () => generate(id_alphabet, 10);
 // const csurf = require('csurf');
 
 mongoose.connect(`mongodb://db:27017/${process.env.DB_NAME}`, {
@@ -64,88 +59,9 @@ passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-function loggedIn(req, res, next) {
-  if (req.isAuthenticated()) {
-    next();
-  } else {
-    res.status(401).end("Login required");
-  }
-}
-
 /********** ROUTES ************/
-app.get("/", (req, res) => {
-  res.end("hello world");
-});
-
-//show fundraiser setup page
-//  require logged in
-
-app.get("/interactions", (req, res) => {
-  let user_url = req.body.user_url;
-  User.findOne({ url: user_url }, "interactions")
-    .exec()
-    .then((u) => {
-      if (u) {
-        res.status(200).json(u.interactions);
-      } else {
-        res.status(404).end("User not found");
-      }
-    })
-    .catch(() => {
-      res.status(404).end("User not found");
-    });
-});
-
-app.get("/profile", loggedIn, (req, res) => {
-  let user = req.user;
-  User.findById(user.id)
-    .select("firstname lastname email url interactions")
-    .exec()
-    .then((u) => {
-      if (u) {
-        res.status(200).json(u);
-      } else {
-        res.status(404).end("User not found");
-      }
-    })
-    .catch(() => {
-      res.status(404).end("User not found");
-    });
-});
-
-app.post("/login", passport.authenticate("local"), (req, res) => {
-  //
-  res.end("logged in");
-});
-
-app.post("/signup", (req, res) => {
-  User.register(
-    new User({
-      firstname: req.body.firstname,
-      lastname: req.body.lastname,
-      email: req.body.email,
-      url: nanoid(),
-    }),
-    req.body.password,
-    function (err, account) {
-      if (err) {
-        //handle error
-        console.log(err);
-        res.end("account exists");
-      }
-      console.log(account);
-      passport.authenticate("local")(req, res, function () {
-        //on success
-        res.end("signup successful");
-      });
-    }
-  );
-});
-
-app.post("/logout", (req, res) => {
-  req.logout();
-  res.end("logged out");
-});
+const routes = require("./routes/routes.js");
+app.use("/", routes);
 
 const server = app.listen(process.env.PORT, function () {
   console.log(`Listening on port: ${process.env.PORT}`);

@@ -1,6 +1,11 @@
 const mongoose = require("mongoose");
 require("mongoose-type-email");
 const passportLocalMongoose = require("passport-local-mongoose");
+const en = require("nanoid-good/locale/en");
+const generate = require("nanoid-good/generate")(en);
+const id_alphabet = "2346789ABCDEFGHJKLMNPQRTUVWXYZabcdefghijkmnpqrtwxyz";
+// const nanoid = customAlphabet(id_alphabet);
+const nanoid = () => generate(id_alphabet, 10);
 
 const userSchema = new mongoose.Schema({
   firstname: {
@@ -22,10 +27,12 @@ const userSchema = new mongoose.Schema({
   ],
   url: {
     type: String,
+    default: nanoid,
     unique: true,
   },
   email: {
     type: mongoose.SchemaTypes.Email,
+    required: true,
   },
 });
 
