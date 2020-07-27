@@ -18,7 +18,6 @@ const userSchema = new mongoose.Schema({
   },
   interactions: [
     {
-      id: mongoose.ObjectId,
       name: String,
       description: String,
       price: Number,

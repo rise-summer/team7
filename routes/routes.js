@@ -58,9 +58,62 @@ router.get("/profile", loggedIn, (req, res) => {
     });
 });
 
-// router.post("/addInteraction", loggedIn, (req, res) => {
-//
-// });
+router.post(
+  "/addInteraction",
+  [
+    body("name").notEmpty().trim().escape(),
+    body("description").notEmpty().trim().escape(),
+    body("price").isInt({ min: 1 }).toInt(), //price in cents
+    body("limit").isInt({ min: 1 }).toInt(),
+  ],
+  loggedIn,
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    User.findByIdAndUpdate(req.user.id, {
+      $push: {
+        interactions: {
+          name: req.body.name,
+          description: req.body.description,
+          price: req.body.price,
+          limit: req.body.limit,
+        },
+      },
+    })
+      .then(() => {
+        res.status(200).end("added");
+      })
+      .catch((e) => {
+        console.log(e);
+        res.status(400).end("failed");
+      });
+  }
+);
+
+router.delete(
+  "/deleteInteraction",
+  [body("interaction_id").isMongoId()],
+  loggedIn,
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    User.findByIdAndUpdate(req.user.id, {
+      $pull: {
+        interactions: { _id: req.body.interaction_id },
+      },
+    })
+      .then(() => {
+        res.status(200).end("deleted");
+      })
+      .catch(() => {
+        res.status(400).end("failed");
+      });
+  }
+);
 
 router.post("/login", passport.authenticate("local"), (req, res) => {
   res.status(200).end("logged in");
