@@ -17,6 +17,8 @@ mongoose.connect(`mongodb://db:27017/${process.env.DB_NAME}`, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   authSource: "admin",
+  useFindAndModify: false,
+  useCreateIndex: true,
 });
 
 const db = mongoose.connection;
