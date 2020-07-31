@@ -16,6 +16,7 @@ mongoose.connect(`mongodb://db:27017/${process.env.DB_NAME}`, {
   },
   useNewUrlParser: true,
   useUnifiedTopology: true,
+
   authSource: "admin",
 });
 
@@ -61,7 +62,9 @@ passport.deserializeUser(User.deserializeUser());
 
 /********** ROUTES ************/
 const routes = require("./routes/routes.js");
+
 app.use("/", routes);
+
 
 const server = app.listen(process.env.PORT, function () {
   console.log(`Listening on port: ${process.env.PORT}`);

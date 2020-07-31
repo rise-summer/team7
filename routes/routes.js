@@ -2,9 +2,12 @@ const express = require("express");
 const router = express.Router();
 const { body, validationResult } = require("express-validator");
 const passport = require("passport");
+const bodyParser = require('body-parser');
+const urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 const User = require("../models/user.js");
-
+const RequestDB = require("../utilities/RequestDB.js");
+const requestDB=new RequestDB();
 function loggedIn(req, res, next) {
   if (req.isAuthenticated()) {
     next();
@@ -103,6 +106,57 @@ router.post(
     );
   }
 );
+
+//Requesting a user for an interaction
+router.post('/request', async (req,res)=>{
+//Save request and update pending request's for a user only if limit is not met.
+var fundraiserEmail=req.body.fundraiserEmail;
+var interaction=req.body.name;
+var firstname=req.body.firstname;
+var lastname=req.body.lastname;
+var email=req.body.email;
+var flag=0;
+try{
+flag=await requestDB.checklimit(fundraiserEmail,interaction);
+}catch(e){
+  res.status(500).end("Databse Connectivity issue due to"+e);
+}
+  if(flag){
+    res.status(503).end("Limit has been reached .Please try again tommorrow.")
+  }else{
+    //We need to check if donor has already requested =that is tag is pending,accepted closed
+    try{
+    var status=await requestDB.checkTag(fundraiserEmail,email,interaction);}
+    catch(err){
+      res.status(500).end("Databse Connectivity issue due to"+e);
+    }
+    if(status=="Pending"||status=="Accepted"){
+      res.status(400).end("You have already requested an interaction .Please wait till it is closed before you request another one.")
+    }else{
+      //Getting an array of updated interactions
+      var interactions=await requestDB.updateLimit(fundraiserEmail,interaction);
+      const update = { interactions: interactions };
+      const filter = { email:fundraiserEmail };
+      //Update user
+      try{
+      let doc = await User.findOneAndUpdate(filter, update, {
+        new: true
+      });
+    
+      }
+      catch(err){
+       return reject(err);
+      }
+      //Create Request for a donor
+      requestDB.saveInfo(fundraiserEmail,email,interaction,firstname,lastname);}
+
+    res.status(200).end("Request sent to Fundraiser");
+  }
+
+
+
+
+});
 
 router.post("/logout", (req, res) => {
   req.logout();
