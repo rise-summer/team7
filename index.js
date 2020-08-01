@@ -7,6 +7,7 @@ const session = require("express-session");
 const MongoStore = require("connect-mongo")(session);
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 // const csurf = require('csurf');
 
 mongoose.connect(`mongodb://db:27017/${process.env.DB_NAME}`, {
@@ -31,6 +32,7 @@ db.once("open", function () {
 
 const app = express();
 
+app.use(cors({ credentials: true, origin: "http://localhost:19006" }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 let cookie = {
