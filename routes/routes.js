@@ -110,14 +110,14 @@ router.post(
 //Requesting a user for an interaction
 router.post('/request', async (req,res)=>{
 //Save request and update pending request's for a user only if limit is not met.
-var fundraiserEmail=req.body.fundraiserEmail;
-var interaction=req.body.name;
+var url=req.body.url;
+var interaction=req.body.id;
 var firstname=req.body.firstname;
 var lastname=req.body.lastname;
 var email=req.body.email;
 var flag=0;
 try{
-flag=await requestDB.checklimit(fundraiserEmail,interaction);
+flag=await requestDB.checklimit(url,interaction);
 }catch(e){
   res.status(500).end("Databse Connectivity issue due to"+e);
 }
@@ -126,7 +126,7 @@ flag=await requestDB.checklimit(fundraiserEmail,interaction);
   }else{
     //We need to check if donor has already requested =that is tag is pending,accepted closed
     try{
-    var status=await requestDB.checkTag(fundraiserEmail,email,interaction);}
+    var status=await requestDB.checkTag(url,email,interaction);}
     catch(err){
       res.status(500).end("Databse Connectivity issue due to"+e);
     }
@@ -134,21 +134,21 @@ flag=await requestDB.checklimit(fundraiserEmail,interaction);
       res.status(400).end("You have already requested an interaction .Please wait till it is closed before you request another one.")
     }else{
       //Getting an array of updated interactions
-      var interactions=await requestDB.updateLimit(fundraiserEmail,interaction);
+      var interactions=await requestDB.updateLimit(url,interaction);
       const update = { interactions: interactions };
-      const filter = { email:fundraiserEmail };
+      const filter = { url:url };
       //Update user
       try{
       let doc = await User.findOneAndUpdate(filter, update, {
         new: true
       });
-    
+
       }
       catch(err){
        return reject(err);
       }
       //Create Request for a donor
-      requestDB.saveInfo(fundraiserEmail,email,interaction,firstname,lastname);}
+      requestDB.saveInfo(url,email,interaction,firstname,lastname);}
 
     res.status(200).end("Request sent to Fundraiser");
   }

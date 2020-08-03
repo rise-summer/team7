@@ -6,17 +6,17 @@ const User=require("../models/user.js");
 //All request related functions
 class RequestDB{
   //Checking if interaction limit is met for particular interaction of a fundraiser.
-checklimit(email,name){
+checklimit(url,id){
   return new Promise((resolve, reject) => {
         var limit=-1;
         User
-       .findOne({email:email},"interactions")
+       .findOne({url:url},"interactions")
        .then((data) => {
 
          var interactions=data.interactions;
-
+         console.log(interactions);
       for(var i=0;i<interactions.length;i++){
-         if(interactions[i].name==name){
+         if(interactions[i]._id==id){
            limit=interactions[i].limit;
            break;
          }
@@ -36,12 +36,12 @@ checklimit(email,name){
 
 }
 //Checking if a request already exists and the status of it
- checkTag(fundraiserEmail,email,name){
+ checkTag(url,email,id){
   return new Promise((resolve, reject) => {
     Request.findOne({
-    fundraiserEmail:fundraiserEmail,email:email,name:name},"tag").then((data) =>{
+    url:url,email:email,id:id},"tag").then((data) =>{
       if(data){
-         
+
           resolve(data.tag);
       }else{
         resolve("Not Created Yet");
@@ -55,16 +55,16 @@ checklimit(email,name){
   });
  }
  //Creating a new request
- saveInfo(fundraiserEmail,email,interaction,firstname,lastname){
+ saveInfo(url,email,id,firstname,lastname){
 return new Promise((resolve, reject) => {
 let req=new Request({
   tag:"Pending" ,
-  fundraiserEmail:fundraiserEmail,
+  url:url,
   //Donor information
   firstname:firstname,
   lastname:lastname,
-  //interaction name
-   name:interaction,
+  //interaction id
+   id:id,
   email:email
 });
 
@@ -76,18 +76,18 @@ req.save(function (err, data) {
 });
 }
 //update Limit of interaction after request Created
-updateLimit(email,interaction){
+updateLimit(url,interaction){
 
   return new Promise((resolve, reject) => {
 
         User
-       .findOne({email:email},"interactions")
+       .findOne({url:url},"interactions")
        .then((data) => {
 
          var interactions=data.interactions;
 
       for(var i=0;i<interactions.length;i++){
-         if(interactions[i].name==interaction){
+         if(interactions[i]._id==interaction){
            interactions[i].limit=interactions[i].limit-1;
            break;
          }

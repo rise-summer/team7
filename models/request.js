@@ -13,7 +13,7 @@ tag:{
   type:String,
   required:true,
 },
-fundraiserEmail:{
+url:{
   type:String,
   required:true,
 },
@@ -28,7 +28,7 @@ lastname: {
 },
 
 //interaction name
- name:{
+ id:{
    type:String,
    required:true
  },
