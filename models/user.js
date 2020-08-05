@@ -33,6 +33,14 @@ const userSchema = new mongoose.Schema({
     type: mongoose.SchemaTypes.Email,
     required: true,
   },
+  organization: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
 });
 
 userSchema.plugin(passportLocalMongoose, {

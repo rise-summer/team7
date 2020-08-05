@@ -44,7 +44,9 @@ router.get(
 router.get("/profile", loggedIn, (req, res) => {
   let user = req.user;
   User.findById(user.id)
-    .select("firstname lastname email url interactions")
+    .select(
+      "firstname lastname email url interactions description organization"
+    )
     .exec()
     .then((u) => {
       if (u) {
@@ -124,6 +126,8 @@ router.post(
   [
     body("firstname").notEmpty().trim().escape(),
     body("lastname").not().isEmpty().trim().escape(),
+    body("description").trim().escape(),
+    body("organization").notEmpty().trim().escape(),
     body("email").isEmail().normalizeEmail(),
     body("password")
       .isLength({ min: 8 })
@@ -138,6 +142,8 @@ router.post(
       new User({
         firstname: req.body.firstname,
         lastname: req.body.lastname,
+        description: req.body.description,
+        organization: req.body.organization,
         email: req.body.email,
       }),
       req.body.password,
