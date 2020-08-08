@@ -12,13 +12,11 @@ services:
         volumes:
             - .:/src
             # - node_modules:/src/node_modules
-        command: sh -c "cd /src && npm start"
-        environment:
-            NODE_ENV: development
-            PORT: 3000
-            SESSION_SECRET: changethistosomethingsupersecret
-            DB_USERNAME: admin
-            DB_PASSWORD: changethistoamoresecurepassword
+        working_dir: /src
+        command: npm start
+        env_file:
+          - node_env.env
+
     db:
          image: mongo
          restart: unless-stopped
