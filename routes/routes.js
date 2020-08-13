@@ -2,20 +2,28 @@ const express = require("express");
 const router = express.Router();
 const { body, validationResult } = require("express-validator");
 const passport = require("passport");
+const jwt = require("jsonwebtoken");
 
 const User = require("../models/user.js");
 
 function loggedIn(req, res, next) {
-  if (req.isAuthenticated()) {
-    next();
-  } else {
-    res.status(401).end("Login required");
-  }
+  // if (req.isAuthenticated()) {
+  //   next();
+  // } else {
+  //   res.status(401).end("Login required");
+  // }
+  passport.authenticate("jwt", function (err, user, _info) {
+    if (err) {
+      res.status(401).end("Login required");
+    }
+    if (!user) {
+      return res.status(401).json({ error: "Invalid credentials." });
+    }
+    if (user) {
+      next();
+    }
+  })(req, res, next);
 }
-
-router.get("/ping", (req, res) => {
-  res.end("pong");
-});
 
 router.get(
   "/interactions",
@@ -117,8 +125,21 @@ router.delete(
   }
 );
 
-router.post("/login", passport.authenticate("local"), (req, res) => {
-  res.status(200).end("logged in");
+router.post("/login", (req, res, next) => {
+  passport.authenticate("local", function (err, user, _info) {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      return res.status(401).json({ error: "Invalid credentials." });
+    }
+    if (user) {
+      var token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+        expiresIn: "1d",
+      });
+      return res.status(200).json({ token });
+    }
+  })(req, res, next);
 });
 
 router.post(
@@ -154,9 +175,16 @@ router.post(
           res.status(409).end("account exists");
         }
         console.log(account);
-        passport.authenticate("local")(req, res, function () {
+        passport.authenticate("local")(req, res, function (err, user, _info) {
           //on success
-          res.status(201).end("signup successful");
+          if (user) {
+            var token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+              expiresIn: "1d",
+            });
+            return res.status(200).json({ token });
+          } else {
+            return res.status(401).json({ error: "Invalid credentials." });
+          }
         });
       }
     );
