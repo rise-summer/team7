@@ -4,9 +4,10 @@ const { body, validationResult } = require("express-validator");
 const passport = require("passport");
 const bodyParser = require('body-parser');
 const urlencodedParser = bodyParser.urlencoded({ extended: false });
-
+const Mailer=require('../email/Mailer.js');
 const User = require("../models/user.js");
 const RequestDB = require("../utilities/RequestDB.js");
+const Request=require("../models/request.js");
 const requestDB=new RequestDB();
 function loggedIn(req, res, next) {
   if (req.isAuthenticated()) {
@@ -19,6 +20,7 @@ function loggedIn(req, res, next) {
 router.get("/ping", (req, res) => {
   res.end("pong");
 });
+
 
 router.get(
   "/interactions",
@@ -61,9 +63,7 @@ router.get("/profile", loggedIn, (req, res) => {
     });
 });
 
-// router.post("/addInteraction", loggedIn, (req, res) => {
-//
-// });
+
 
 router.post("/login", passport.authenticate("local"), (req, res) => {
   res.status(200).end("logged in");
@@ -142,20 +142,45 @@ flag=await requestDB.checklimit(url,interaction);
       let doc = await User.findOneAndUpdate(filter, update, {
         new: true
       });
-
+      var fundraiserEmail=doc.email;
       }
       catch(err){
        return reject(err);
       }
       //Create Request for a donor
-      requestDB.saveInfo(url,email,interaction,firstname,lastname);}
+      requestDB.saveInfo(url,email,interaction,firstname,lastname);
+    //Send an email to the fundraiser about the new request.
+   var transporter=Mailer.transporter;
+var mailOptions=Mailer.mailOptions(fundraiserEmail,"New Interaction Request from "+firstname,"Check pending requests To accept/reject an interaction Request");
 
-    res.status(200).end("Request sent to Fundraiser");
+// sending an email
+transporter.sendMail(mailOptions, (error, response) => {
+if (error) {
+    console.log(error);
+
+}
+else{console.log("Sent an email");}
+});
+
+res.status(200).end("Request sent to the Fundraiser");
+    }
   }
+});
 
-
-
-
+//Loading all the accepted request's
+router.get("/accepted",loggedIn,(req, res) => {
+  let user = req.user;
+  Request.find({"url":user.url,"tag":"Accepted"})
+      .then((data) => {
+      if (data) {
+        res.status(200).json(data);
+      } else {
+        res.status(404).end("No Accepted Request's");
+      }
+    })
+    .catch(() => {
+      res.status(404).end("User not found");
+    });
 });
 
 router.post("/logout", (req, res) => {

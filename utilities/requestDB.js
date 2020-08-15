@@ -102,6 +102,33 @@ updateLimit(url,interaction){
 
   });
 }
+//update Limit of interaction after request Created
+increaseLimit(url,interaction){
+
+  return new Promise((resolve, reject) => {
+
+        User
+       .findOne({url:url},"interactions")
+       .then((data) => {
+
+         var interactions=data.interactions;
+
+      for(var i=0;i<interactions.length;i++){
+         if(interactions[i]._id==interaction){
+           interactions[i].limit=interactions[i].limit+1;
+           break;
+         }
+       }
+       resolve(interactions);
+
+
+           })
+         .catch((err) => {
+           return reject(err);
+         });
+
+  });
+}
 }
 // export only class with methods to make sure, other part of this app can't modify hardcoded data.
 module.exports = RequestDB;

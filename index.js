@@ -1,7 +1,6 @@
 "use strict";
 
 const express = require("express");
-
 const passport = require("passport");
 const session = require("express-session");
 const MongoStore = require("connect-mongo")(session);
@@ -62,9 +61,9 @@ passport.deserializeUser(User.deserializeUser());
 
 /********** ROUTES ************/
 const routes = require("./routes/routes.js");
-
+const pending=require("./routes/pending.js");
 app.use("/", routes);
-
+app.use("/pending",pending);
 
 const server = app.listen(process.env.PORT, function () {
   console.log(`Listening on port: ${process.env.PORT}`);
