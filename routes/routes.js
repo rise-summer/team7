@@ -20,7 +20,9 @@ function loggedIn(req, res, next) {
       return res.status(401).json({ error: "Invalid credentials." });
     }
     if (user) {
-      next();
+      req.logIn(user, () => {
+        next();
+      });
     }
   })(req, res, next);
 }
@@ -51,7 +53,7 @@ router.get(
 
 router.get("/profile", loggedIn, (req, res) => {
   let user = req.user;
-  User.findById(user.id)
+  User.findById(user._id)
     .select(
       "firstname lastname email url interactions description organization"
     )
