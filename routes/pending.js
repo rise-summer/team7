@@ -5,10 +5,13 @@ const passport = require("passport");
 const bodyParser = require('body-parser');
 const urlencodedParser = bodyParser.urlencoded({ extended: false });
 const Mailer=require('../email/Mailer.js');
+
 const User = require("../models/user.js");
 const RequestDB = require("../utilities/RequestDB.js");
 const Request=require("../models/request.js");
 const requestDB=new RequestDB();
+
+
 function loggedIn(req, res, next) {
   if (req.isAuthenticated()) {
     next();
@@ -41,6 +44,7 @@ router.post("/accept",loggedIn, async (req, res) => {
   var firstname=req.body.firstname
   //Sending an acceptance Email to the Donor.
   var transporter=Mailer.transporter;
+
   var mailOptions=Mailer.mailOptions(email,"Interaction Request Accepted ","Hello "+firstname+","+"The fundraiser has accepted your interaction request.Please click on https://calendly.com/spaluri/15min to schedule your appointment.");
 
   //Getting an array of updated interactions
@@ -67,13 +71,15 @@ try{
      else{
          res.status(200).json(docs);
 
+
         // sending an email to the donor
-         transporter.sendMail(mailOptions, (error, response) => {
+        transporter.sendMail(mailOptions, (error, response) => {
+           console.log(mailOptions.to);
          if (error) {
              console.log(error);
 
          }
-         else{console.log("Sent a donor acceptance email"+response);}
+         else{console.log("Sent a donor acceptance email"+response.response);}
          });
      }
  });
@@ -96,7 +102,7 @@ if (error) {
     console.log(error);
 
 }
-else{console.log("Sent a donor email"+response);}
+else{console.log("Sent a donor email"+response.response);}
 });
 
 //Update limit
