@@ -36,7 +36,22 @@ router.get("/",loggedIn,(req, res) => {
 });
 
 //Accepting a request
-router.post("/accept",loggedIn, async (req, res) => {
+router.post("/accept",loggedIn,
+[
+body("_id").notEmpty().trim().escape().isMongoId(),
+  body("firstname").notEmpty().trim().escape(),
+  body("lastname").not().isEmpty().trim().escape(),
+  body("email").isEmail().normalizeEmail(),
+  body("id").notEmpty().trim().escape().isMongoId(),
+],
+
+ async (req, res) => {
+   //Validation check
+   const errors = validationResult(req);
+   if (!errors.isEmpty()) {
+     return res.status(400).json({ errors: errors.array() });
+   }
+//Get post paramas
   let user = req.user;
   var requestId=req.body._id;
   var interactionId=req.body.id;
@@ -70,14 +85,11 @@ try{
      }
      else{
          res.status(200).json(docs);
-
-
         // sending an email to the donor
         transporter.sendMail(mailOptions, (error, response) => {
            console.log(mailOptions.to);
          if (error) {
              console.log(error);
-
          }
          else{console.log("Sent a donor acceptance email"+response.response);}
          });
@@ -87,7 +99,21 @@ try{
 });
 
 //Rejecting a request
-router.post("/reject",loggedIn,async (req, res) => {
+router.post("/reject",loggedIn,
+[
+body("_id").notEmpty().trim().escape().isMongoId(),
+  body("firstname").notEmpty().trim().escape(),
+  body("lastname").not().isEmpty().trim().escape(),
+  body("email").isEmail().normalizeEmail(),
+  body("id").notEmpty().trim().escape().isMongoId(),
+],
+async (req, res) => {
+  //Validation check
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+//Get post paramas
   let user = req.user;
   var requestId=req.body._id;
   var interactionId=req.body.id;
@@ -95,7 +121,7 @@ router.post("/reject",loggedIn,async (req, res) => {
   var firstname=req.body.firstname;
 //Send a rejection Email to the Donor.
 var transporter=Mailer.transporter;
-var mailOptions=Mailer.mailOptions(email,"Interaction Request Denied ","Sorry "+firstname+","+"The fundraiser at this time is not able to accept youre request.Please try again later.");
+var mailOptions=Mailer.mailOptions(email,"Interaction Request Denied ","Sorry "+firstname+","+"The fundraiser at this time is not able to accept your request.Please try again later.");
 // sending an email
 transporter.sendMail(mailOptions, (error, response) => {
 if (error) {

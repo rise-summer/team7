@@ -108,14 +108,29 @@ router.post(
 );
 
 //Requesting a user for an interaction
-router.post('/request', async (req,res)=>{
-//Save request and update pending request's for a user only if limit is not met.
+router.post('/request',
+[
+body("id").notEmpty().trim().escape().isMongoId(),
+  body("firstname").notEmpty().trim().escape(),
+  body("lastname").not().isEmpty().trim().escape(),
+  body("email").isEmail().normalizeEmail(),
+  body("url").not().isEmpty().trim().escape()
+],
+
+ async (req,res)=>{
+   //Validation check
+   const errors = validationResult(req);
+   if (!errors.isEmpty()) {
+     return res.status(400).json({ errors: errors.array() });
+   }
+//Get post paramas
 var url=req.body.url;
 var interaction=req.body.id;
 var firstname=req.body.firstname;
 var lastname=req.body.lastname;
 var email=req.body.email;
 var flag=0;
+//Save request and update pending request's for a user only if limit is not met.
 try{
 flag=await requestDB.checklimit(url,interaction);
 }catch(e){
