@@ -174,20 +174,24 @@ router.post(
         if (err) {
           //handle error
           console.log(err);
-          res.status(409).end("account exists");
+          res.status(409).end("Error creating account");
         }
         console.log(account);
-        passport.authenticate("local")(req, res, function (err, user, _info) {
-          //on success
-          if (user) {
-            var token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-              expiresIn: "1d",
-            });
-            return res.status(200).json({ token });
-          } else {
-            return res.status(401).json({ error: "Invalid credentials." });
-          }
+        var token = jwt.sign({ id: account._id }, process.env.JWT_SECRET, {
+          expiresIn: "1d",
         });
+        return res.status(200).json({ token });
+        // passport.authenticate("local")(req, res, function (err, user, _info) {
+        //   //on success
+        //   if (user) {
+        //     var token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+        //       expiresIn: "1d",
+        //     });
+        //     return res.status(200).json({ token });
+        //   } else {
+        //     return res.status(401).json({ error: "Invalid credentials." });
+        //   }
+        // });
       }
     );
   }
