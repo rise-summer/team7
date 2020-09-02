@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema({
       limit: Number,
     },
   ],
-  url: {
+  slug: {
     type: String,
     default: nanoid,
     unique: true,

@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { body, validationResult } = require("express-validator");
+const { body, param, validationResult } = require("express-validator");
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
 
@@ -28,19 +28,22 @@ function loggedIn(req, res, next) {
 }
 
 router.get(
-  "/interactions",
-  [body("user_url").not().isEmpty().trim().escape()],
+  "/interactions/:slug",
+  [param("slug").not().isEmpty().trim().escape()],
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    let user_url = req.body.user_url;
-    User.findOne({ url: user_url }, "interactions")
+    let slug = req.param.slug;
+    User.findOne(
+      { slug: slug },
+      "interactions firstname lastname description organization"
+    )
       .exec()
       .then((u) => {
         if (u) {
-          res.status(200).json(u.interactions);
+          res.status(200).json(u);
         } else {
           res.status(404).end("User not found");
         }
