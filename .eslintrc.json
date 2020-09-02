@@ -1,6 +1,6 @@
 {
     "env": {
-        "browser": true,
+        "node": true,
         "commonjs": true,
         "es2020": true
     },
@@ -12,5 +12,6 @@
         "ecmaVersion": 11
     },
     "rules": {
+      "no-unused-vars": ["error", {"argsIgnorePattern": "^_"}]
     }
 }

@@ -1,7 +1,7 @@
 version: '3.7'
 services:
     web:
-        image: node:12
+        build: .
         restart: unless-stopped
         ports:
           - "443:443"
@@ -11,21 +11,19 @@ services:
           - db
         volumes:
             - .:/src
-            # - node_modules:/src/node_modules
-        working_dir: /src
-        command: npm start
-        env_file:
-          - node_env.env
-
+            - node_modules:/src/node_modules
+        environment:
+            NODE_ENV: development
+            PORT: 3000
     db:
          image: mongo
          restart: unless-stopped
          environment:
-            MONGO_INITDB_ROOT_USERNAME: admin
+            MONGO_INITDB_ROOT_USERNAME: root
             MONGO_INITDB_ROOT_PASSWORD: changethistoamoresecurepassword
          volumes:
            - ./data:/data/db
          logging:
              driver: "none"
-# volumes:
-#     node_modules:
+volumes:
+    node_modules:
